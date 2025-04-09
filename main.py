@@ -20,7 +20,7 @@ def carrier_details():
     }
 
     try:
-        res = requests.get(url, headers=headers, timeout=10)
+        res = requests.get(url, headers=headers, timeout=15)
         if res.status_code != 200:
             return {
                 "error": "Failed to fetch page",
