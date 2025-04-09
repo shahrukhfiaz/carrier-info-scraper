@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 import re
 import os
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
@@ -27,15 +28,29 @@ def carrier_details():
                 "usdot": usdot
             }, 400
 
-        html = res.text
+        soup = BeautifulSoup(res.text, "html.parser")
+        carrier_info = {}
 
-        # Extract <td class="col1">...</td> with flexible matching
-        matches = re.findall(r'<td[^>]*class=["\']?\s*col1\s*["\']?[^>]*>(.*?)<\/td>', html, re.IGNORECASE)
-        cleaned = [re.sub(r'<.*?>', '', m).strip() for m in matches]  # remove any nested tags
+        ul_col1 = soup.find("ul", class_="col1")
+        if not ul_col1:
+            return {
+                "usdot": usdot,
+                "carrier_info": {},
+                "message": "No carrier info found"
+            }
+
+        for li in ul_col1.find_all("li"):
+            label = li.find("label")
+            span = li.find("span", class_="dat")
+
+            if label and span:
+                key = label.get_text(strip=True).replace(":", "")
+                value = span.get_text(separator=" ", strip=True).replace("\n", " ").replace("\r", "")
+                carrier_info[key] = value
 
         return {
             "usdot": usdot,
-            "col1_values": cleaned
+            "carrier_info": carrier_info
         }
 
     except Exception as e:
