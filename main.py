@@ -29,9 +29,9 @@ def carrier_details():
 
         html = res.text
 
-        # Extract <td class="col1">...</td>
-        matches = re.findall(r'<td\s+class="col1">([\s\S]*?)<\/td>', html, re.IGNORECASE)
-        cleaned = [m.strip() for m in matches]
+        # Extract <td class="col1">...</td> with flexible matching
+        matches = re.findall(r'<td[^>]*class=["\']?\s*col1\s*["\']?[^>]*>(.*?)<\/td>', html, re.IGNORECASE)
+        cleaned = [re.sub(r'<.*?>', '', m).strip() for m in matches]  # remove any nested tags
 
         return {
             "usdot": usdot,
