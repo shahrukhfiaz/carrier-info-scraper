@@ -10,8 +10,17 @@ app = Flask(__name__)
 @app.route("/carrier", methods=["GET"])
 def carrier_details():
     usdot = request.args.get("usdot")
+    delay_ms = request.args.get("delay", default="0")
+
     if not usdot:
         return {"error": "Missing USDOT number"}, 400
+
+    try:
+        # Convert delay to float seconds
+        delay_seconds = float(delay_ms) / 1000
+        time.sleep(delay_seconds)
+    except Exception as e:
+        return {"error": "Invalid delay value", "details": str(e)}, 400
 
     url = f"https://ai.fmcsa.dot.gov/SMS/Carrier/{usdot}/CarrierRegistration.aspx"
     headers = {
@@ -21,7 +30,6 @@ def carrier_details():
     }
 
     try:
-        time.sleep(0.5)  # Delay added here
         res = requests.get(url, headers=headers, timeout=15)
         if res.status_code != 200:
             return {
