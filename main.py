@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import requests
 import re
 import os
+import time
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
@@ -20,6 +21,7 @@ def carrier_details():
     }
 
     try:
+        time.sleep(0.5)  # Delay added here
         res = requests.get(url, headers=headers, timeout=15)
         if res.status_code != 200:
             return {
